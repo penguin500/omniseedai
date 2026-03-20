@@ -737,9 +737,9 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
             <button onclick="quickBuy(0.01)">Buy 0.01</button>
             <button onclick="quickBuy(0.05)">Buy 0.05</button>
             <button onclick="quickBuy(0.1)">Buy 0.1</button>
-            <button class="sell" onclick="quickSell(25)">Sell 25%</button>
-            <button class="sell" onclick="quickSell(50)">Sell 50%</button>
-            <button class="sell" onclick="quickSell(100)">Sell All</button>
+            <button class="sell" onclick="chartQuickSell(25)">Sell 25%</button>
+            <button class="sell" onclick="chartQuickSell(50)">Sell 50%</button>
+            <button class="sell" onclick="chartQuickSell(100)">Sell All</button>
           </div>
         </div>
       </div>
@@ -1750,7 +1750,7 @@ function quickBuy(solAmt){
   onInputChange();
 }
 
-function quickSell(pct){
+function chartQuickSell(pct){
   if(!chartToken) return;
   // Set up swap with token as input, SOL as output
   inputToken={symbol:'Token',name:'Token',mint:chartToken,icon:'',decimals:6};
