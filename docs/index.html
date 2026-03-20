@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OmniSwap API — Documentation for Bots & Agents</title>
+<meta name="description" content="The simplest swap API for Solana bots and AI agents. 3 lines of code. Best prices via Jupiter. Python + JavaScript SDKs.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#05050a;--card:#0e0e18;--border:#1a1a2e;--accent:#00ff88;--purple:#9945ff;--blue:#00d4ff;
+  --text:#e8e8ee;--text2:#b0b0c0;--dim:#5a5a70;--green:#14f195;--red:#ff4466;--gold:#ffd700;
+  --code-bg:#0a0a16;--radius:12px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.7;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;}
+.container{max-width:900px;margin:0 auto;padding:40px 24px;}
+
+/* Hero */
+.hero{text-align:center;padding:60px 0 40px;border-bottom:1px solid var(--border);margin-bottom:40px;}
+.hero h1{font-size:48px;font-weight:900;margin-bottom:8px;}
+.hero h1 span{background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{font-size:18px;color:var(--text2);max-width:600px;margin:0 auto 24px;}
+.hero-badges{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.badge{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid var(--border);}
+.badge.green{background:rgba(0,255,136,0.1);color:var(--accent);border-color:rgba(0,255,136,0.3);}
+.badge.purple{background:rgba(153,69,255,0.1);color:var(--purple);border-color:rgba(153,69,255,0.3);}
+.badge.blue{background:rgba(0,212,255,0.1);color:var(--blue);border-color:rgba(0,212,255,0.3);}
+.badge.gold{background:rgba(255,215,0,0.1);color:var(--gold);border-color:rgba(255,215,0,0.3);}
+
+/* Quick Start */
+.quickstart{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:32px;}
+.quickstart h2{font-size:20px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+/* Code blocks */
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px 20px;
+  overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;margin:12px 0;}
+code{font-family:'JetBrains Mono',monospace;font-size:13px;}
+.lang{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);margin-bottom:4px;display:block;}
+.comment{color:#5a6a8a;}
+.string{color:#a8d8a8;}
+.keyword{color:#c792ea;}
+.func{color:#82aaff;}
+.const{color:#f78c6c;}
+
+/* Sections */
+h2{font-size:24px;font-weight:800;margin:40px 0 16px;padding-top:24px;border-top:1px solid var(--border);}
+h3{font-size:18px;font-weight:700;margin:24px 0 12px;color:var(--accent);}
+p{margin-bottom:12px;color:var(--text2);}
+
+/* Endpoint cards */
+.endpoint{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+.endpoint .method{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:800;margin-right:8px;}
+.endpoint .method.get{background:rgba(0,255,136,0.15);color:var(--accent);}
+.endpoint .method.post{background:rgba(0,212,255,0.15);color:var(--blue);}
+.endpoint .path{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;}
+.endpoint .desc{color:var(--text2);font-size:13px;margin-top:8px;}
+
+/* Table */
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+th{text-align:left;padding:10px 12px;background:var(--card);border:1px solid var(--border);font-weight:700;font-size:11px;
+  text-transform:uppercase;letter-spacing:1px;color:var(--dim);}
+td{padding:10px 12px;border:1px solid var(--border);}
+td code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:12px;}
+
+/* Fee callout */
+.fee-box{background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(153,69,255,0.05));
+  border:1px solid rgba(255,215,0,0.2);border-radius:var(--radius);padding:20px;margin:24px 0;text-align:center;}
+.fee-box .fee-amount{font-size:36px;font-weight:900;color:var(--gold);}
+.fee-box .fee-label{font-size:14px;color:var(--text2);}
+
+/* Nav */
+.nav{position:sticky;top:0;background:rgba(5,5,10,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);
+  padding:12px 24px;z-index:100;display:flex;justify-content:space-between;align-items:center;}
+.nav .logo{font-weight:900;font-size:16px;}
+.nav .logo span{background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.nav .links{display:flex;gap:20px;font-size:13px;font-weight:600;}
+.nav .links a{color:var(--text2);}
+.nav .links a:hover{color:var(--accent);text-decoration:none;}
+
+/* CTA */
+.cta{text-align:center;padding:40px 0;margin-top:40px;border-top:1px solid var(--border);}
+.cta h2{border:none;padding:0;margin:0 0 12px;}
+.cta p{max-width:500px;margin:0 auto 20px;}
+.cta-btn{display:inline-block;padding:14px 32px;border-radius:12px;font-weight:800;font-size:15px;
+  background:linear-gradient(135deg,var(--accent),#00cc66);color:#000;transition:all .2s;}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,255,136,0.3);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="logo">&#9889; <span>OmniSwap</span> API</div>
+  <div class="links">
+    <a href="#quickstart">Quick Start</a>
+    <a href="#endpoints">Endpoints</a>
+    <a href="#python">Python SDK</a>
+    <a href="#javascript">JavaScript SDK</a>
+    <a href="#agents">Agent Tools</a>
+    <a href="../swap/">Launch App</a>
+  </div>
+</nav>
+
+<div class="container">
+
+<div class="hero">
+  <h1>&#9889; <span>OmniSwap</span> API</h1>
+  <p>The simplest swap API for Solana. Built for bots, AI agents, and dApps. Best execution via Jupiter aggregation. 3 lines of code.</p>
+  <div class="hero-badges">
+    <span class="badge green">0.5% Platform Fee</span>
+    <span class="badge purple">Jupiter Aggregation</span>
+    <span class="badge blue">Python + JS SDKs</span>
+    <span class="badge gold">Agent-Ready Tools</span>
+  </div>
+</div>
+
+<div class="fee-box">
+  <div class="fee-amount">0.5% per swap</div>
+  <div class="fee-label">Best prices via Jupiter &mdash; optimized priority fees &mdash; all Solana tokens supported</div>
+</div>
+
+<div class="quickstart" id="quickstart">
+  <h2>&#128640; Quick Start</h2>
+
+  <span class="lang">Python (3 lines)</span>
+<pre><span class="keyword">from</span> omniswap <span class="keyword">import</span> OmniSwap
+
+swap = OmniSwap()
+quote = swap.quote(<span class="string">"SOL"</span>, <span class="string">"USDC"</span>, amount_sol=<span class="const">1.5</span>)
+<span class="func">print</span>(<span class="string">f"You'll get: {quote['output_human']} USDC"</span>)</pre>
+
+  <span class="lang">JavaScript (3 lines)</span>
+<pre><span class="keyword">const</span> swap = <span class="keyword">new</span> <span class="func">OmniSwap</span>();
+<span class="keyword">const</span> quote = <span class="keyword">await</span> swap.<span class="func">quote</span>(<span class="string">'SOL'</span>, <span class="string">'USDC'</span>, { amountSol: <span class="const">1.5</span> });
+console.<span class="func">log</span>(<span class="string">`Output: ${quote.outputHuman} USDC`</span>);</pre>
+
+  <span class="lang">cURL (direct API)</span>
+<pre>curl <span class="string">"https://omniswap-api.workers.dev/v1/quote?input=SOL&output=USDC&amount=1500000000"</span></pre>
+
+  <span class="lang">AI Agent Tool Call</span>
+<pre>{
+  <span class="string">"tool"</span>: <span class="string">"omniswap_quote"</span>,
+  <span class="string">"input_token"</span>: <span class="string">"SOL"</span>,
+  <span class="string">"output_token"</span>: <span class="string">"USDC"</span>,
+  <span class="string">"amount_sol"</span>: <span class="const">1.5</span>
+}</pre>
+</div>
+
+<h2 id="endpoints">&#128279; API Endpoints</h2>
+
+<div class="endpoint">
+  <span class="method get">GET</span>
+  <span class="path">/v1/quote</span>
+  <div class="desc">Get a swap quote with OmniSwap fee included. Returns expected output amount, price impact, and route info.</div>
+  <table>
+    <tr><th>Parameter</th><th>Required</th><th>Description</th></tr>
+    <tr><td><code>input</code></td><td>Yes</td><td>Token to sell (symbol: SOL, USDC, or mint address)</td></tr>
+    <tr><td><code>output</code></td><td>Yes</td><td>Token to buy</td></tr>
+    <tr><td><code>amount</code></td><td>Yes</td><td>Amount in smallest unit (lamports for SOL = amount * 10^9)</td></tr>
+    <tr><td><code>slippageBps</code></td><td>No</td><td>Slippage tolerance in bps (default: 50 = 0.5%)</td></tr>
+    <tr><td><code>apiKey</code></td><td>No</td><td>Your API key for tracking</td></tr>
+  </table>
+</div>
+
+<div class="endpoint">
+  <span class="method post">POST</span>
+  <span class="path">/v1/swap</span>
+  <div class="desc">Build a swap transaction. Returns a base64-encoded Solana transaction ready to sign and send.</div>
+  <table>
+    <tr><th>Body Field</th><th>Required</th><th>Description</th></tr>
+    <tr><td><code>quoteResponse</code></td><td>Yes</td><td>Quote object from /v1/quote</td></tr>
+    <tr><td><code>userPublicKey</code></td><td>Yes</td><td>Signer's Solana wallet address</td></tr>
+    <tr><td><code>wrapAndUnwrapSol</code></td><td>No</td><td>Auto-wrap/unwrap SOL (default: true)</td></tr>
+  </table>
+</div>
+
+<div class="endpoint">
+  <span class="method get">GET</span>
+  <span class="path">/v1/price</span>
+  <div class="desc">Get current price, volume, and market data for any Solana token.</div>
+  <table>
+    <tr><th>Parameter</th><th>Required</th><th>Description</th></tr>
+    <tr><td><code>token</code></td><td>Yes</td><td>Token symbol or mint address</td></tr>
+  </table>
+</div>
+
+<div class="endpoint">
+  <span class="method get">GET</span>
+  <span class="path">/v1/tokens</span>
+  <div class="desc">List popular tokens or search by name/symbol.</div>
+  <table>
+    <tr><th>Parameter</th><th>Required</th><th>Description</th></tr>
+    <tr><td><code>search</code></td><td>No</td><td>Search query (name, symbol, or mint)</td></tr>
+  </table>
+</div>
+
+<div class="endpoint">
+  <span class="method post">POST</span>
+  <span class="path">/v1/register</span>
+  <div class="desc">Register for an API key. Free tier: 1,000 requests/day.</div>
+  <table>
+    <tr><th>Body Field</th><th>Required</th><th>Description</th></tr>
+    <tr><td><code>name</code></td><td>Yes</td><td>Your bot/project name</td></tr>
+    <tr><td><code>email</code></td><td>No</td><td>Contact email</td></tr>
+    <tr><td><code>botType</code></td><td>No</td><td>Type: trading-bot, agent, dapp, etc.</td></tr>
+  </table>
+</div>
+
+<h2 id="python">&#128013; Python SDK</h2>
+<p>Full-featured Python SDK with quote, execute, price lookup, and agent tool definitions.</p>
+
+<span class="lang">Install</span>
+<pre>pip install omniswap  <span class="comment"># Coming soon to PyPI</span>
+<span class="comment"># For now, download from:</span>
+<span class="comment"># https://penguin500.github.io/omniseedai/sdk/python/omniswap.py</span></pre>
+
+<span class="lang">Get Quote</span>
+<pre><span class="keyword">from</span> omniswap <span class="keyword">import</span> OmniSwap
+
+swap = OmniSwap(api_key=<span class="string">"your_key"</span>)  <span class="comment"># API key optional</span>
+quote = swap.quote(<span class="string">"SOL"</span>, <span class="string">"USDC"</span>, amount_sol=<span class="const">1.5</span>)
+
+<span class="func">print</span>(<span class="string">f"Input:  {quote['input_human']} SOL"</span>)
+<span class="func">print</span>(<span class="string">f"Output: {quote['output_human']} USDC"</span>)
+<span class="func">print</span>(<span class="string">f"Impact: {quote['price_impact']}%"</span>)
+<span class="func">print</span>(<span class="string">f"Fee:    {quote['platform_fee_bps']} bps"</span>)</pre>
+
+<span class="lang">Execute Swap</span>
+<pre><span class="comment"># Auto-sign and send (requires solders: pip install solders)</span>
+result = swap.execute(
+    <span class="string">"SOL"</span>, <span class="string">"USDC"</span>,
+    amount_sol=<span class="const">1.5</span>,
+    private_key=<span class="string">"your_base58_private_key"</span>
+)
+<span class="func">print</span>(<span class="string">f"TX: {result['explorer']}"</span>)</pre>
+
+<span class="lang">Token Price</span>
+<pre>sol = swap.price(<span class="string">"SOL"</span>)
+<span class="func">print</span>(<span class="string">f"SOL: ${sol['priceUsd']:.2f} ({sol['priceChange24h']:+.1f}%)"</span>)</pre>
+
+<h2 id="javascript">&#128171; JavaScript SDK</h2>
+<p>Works in Node.js and browser. Supports Phantom wallet for browser-based execution.</p>
+
+<span class="lang">Browser</span>
+<pre><span class="comment">&lt;script src="https://penguin500.github.io/omniseedai/sdk/js/omniswap.js"&gt;&lt;/script&gt;</span>
+<span class="keyword">const</span> swap = <span class="keyword">new</span> <span class="func">OmniSwap</span>();
+<span class="keyword">const</span> quote = <span class="keyword">await</span> swap.<span class="func">quote</span>(<span class="string">'SOL'</span>, <span class="string">'USDC'</span>, { amountSol: <span class="const">1.5</span> });</pre>
+
+<span class="lang">Node.js</span>
+<pre><span class="keyword">const</span> { OmniSwap } = <span class="func">require</span>(<span class="string">'./omniswap'</span>);
+<span class="keyword">const</span> swap = <span class="keyword">new</span> <span class="func">OmniSwap</span>();
+
+<span class="comment">// Quote</span>
+<span class="keyword">const</span> q = <span class="keyword">await</span> swap.<span class="func">quote</span>(<span class="string">'SOL'</span>, <span class="string">'BONK'</span>, { amountSol: <span class="const">0.1</span> });
+
+<span class="comment">// Build unsigned TX for your own signing</span>
+<span class="keyword">const</span> tx = <span class="keyword">await</span> swap.<span class="func">buildTransaction</span>(q, <span class="string">'your_wallet_address'</span>);
+
+<span class="comment">// Execute with Phantom (browser only)</span>
+<span class="keyword">const</span> result = <span class="keyword">await</span> swap.<span class="func">executeWithWallet</span>(<span class="string">'SOL'</span>, <span class="string">'USDC'</span>, { amountSol: <span class="const">1</span> });</pre>
+
+<h2 id="agents">&#129302; Agent Integration</h2>
+<p>OmniSwap is built for the <strong>agent economy</strong>. AI agents (Claude, GPT, LangChain, AutoGPT, custom agents) can use OmniSwap as a tool to execute trades on Solana.</p>
+
+<span class="lang">Claude / Anthropic Tool Use</span>
+<pre>{
+  <span class="string">"name"</span>: <span class="string">"omniswap_quote"</span>,
+  <span class="string">"description"</span>: <span class="string">"Get a swap quote for any Solana token pair"</span>,
+  <span class="string">"input_schema"</span>: {
+    <span class="string">"type"</span>: <span class="string">"object"</span>,
+    <span class="string">"properties"</span>: {
+      <span class="string">"input_token"</span>: { <span class="string">"type"</span>: <span class="string">"string"</span> },
+      <span class="string">"output_token"</span>: { <span class="string">"type"</span>: <span class="string">"string"</span> },
+      <span class="string">"amount_sol"</span>: { <span class="string">"type"</span>: <span class="string">"number"</span> }
+    }
+  }
+}</pre>
+
+<span class="lang">Python Agent Integration</span>
+<pre><span class="keyword">from</span> omniswap <span class="keyword">import</span> OmniSwap
+
+swap = OmniSwap()
+tools = swap.as_agent_tools()  <span class="comment"># Returns tool definitions</span>
+
+<span class="comment"># Use with any agent framework:</span>
+<span class="comment"># - Claude API tool_use</span>
+<span class="comment"># - OpenAI function_calling</span>
+<span class="comment"># - LangChain tools</span>
+<span class="comment"># - AutoGPT plugins</span>
+<span class="comment"># - CrewAI tools</span>
+<span class="comment"># Every swap through any agent = 0.5% fee to OmniSwap</span></pre>
+
+<span class="lang">MCP Server (Model Context Protocol)</span>
+<pre><span class="comment"># OmniSwap works as an MCP server for Claude Desktop</span>
+<span class="comment"># Add to claude_desktop_config.json:</span>
+{
+  <span class="string">"mcpServers"</span>: {
+    <span class="string">"omniswap"</span>: {
+      <span class="string">"command"</span>: <span class="string">"python"</span>,
+      <span class="string">"args"</span>: [<span class="string">"omniswap_mcp.py"</span>]
+    }
+  }
+}</pre>
+
+<h2>&#128176; Pricing</h2>
+<table>
+  <tr><th>Tier</th><th>Requests/Day</th><th>Swap Fee</th><th>Price</th></tr>
+  <tr><td><strong>Free</strong></td><td>1,000</td><td>0.5%</td><td>$0</td></tr>
+  <tr><td><strong>Pro</strong></td><td>100,000</td><td>0.5%</td><td>$49/mo</td></tr>
+  <tr><td><strong>Enterprise</strong></td><td>Unlimited</td><td>0.3%</td><td>Contact us</td></tr>
+</table>
+<p style="font-size:12px;color:var(--dim);margin-top:8px;">All tiers include 0.5% swap fee (0.3% for Enterprise). This fee is built into the Jupiter quote — users get best market price minus the platform fee. Fee revenue goes to the OmniSwap network treasury.</p>
+
+<div class="cta">
+  <h2>Start Building</h2>
+  <p>Every bot, every agent, every swap — 0.5% flows to the network. Join the OmniSwap ecosystem.</p>
+  <a href="../swap/" class="cta-btn">Launch OmniSwap App &#8594;</a>
+</div>
+
+<div style="text-align:center;padding:40px 0;font-size:12px;color:var(--dim);">
+  OmniSwap &copy; 2026 &mdash; Built for the agent economy<br>
+  <a href="https://github.com/penguin500/omniseedai">GitHub</a> &middot;
+  <a href="../swap/">App</a> &middot;
+  Fee wallet: <code style="font-size:10px;">4CaTPEr4k17fsb...ZPn</code>
+</div>
+
+</div>
+</body>
+</html>
