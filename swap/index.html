@@ -370,14 +370,55 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
   background:var(--accent-dim);color:var(--accent);transition:all .15s;}
 .market-table .trade-cell button:hover{background:var(--accent);color:#000;}
 
-/* WHALE ALERTS */
+/* WHALE ALERTS - KILLER FEATURE */
 .whale-alerts{margin-top:16px;}
-.whale-alert{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);
-  border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;animation:fadeIn .5s ease;}
-.whale-alert .whale-icon{font-size:20px;}
-.whale-alert .whale-text{flex:1;font-size:12px;}
-.whale-alert .whale-text b{color:var(--accent);}
-.whale-alert .whale-time{font-size:10px;color:var(--dim);}
+.whale-alert{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);
+  border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;animation:slideInWhale .4s ease;
+  transition:all .2s;position:relative;overflow:hidden;}
+.whale-alert:hover{border-color:var(--accent);transform:translateX(4px);}
+.whale-alert::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.whale-alert.buy::before{background:var(--green);}
+.whale-alert.sell::before{background:var(--red);}
+.whale-alert.stake::before{background:var(--purple);}
+.whale-alert.transfer::before{background:var(--blue);}
+.whale-alert .whale-icon{font-size:28px;min-width:36px;text-align:center;}
+.whale-alert .whale-body{flex:1;}
+.whale-alert .whale-action{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;margin-bottom:3px;}
+.whale-alert .whale-action.buy{color:var(--green);}
+.whale-alert .whale-action.sell{color:var(--red);}
+.whale-alert .whale-action.stake{color:var(--purple);}
+.whale-alert .whale-action.transfer{color:var(--blue);}
+.whale-alert .whale-detail{font-size:14px;font-weight:700;color:var(--text);}
+.whale-alert .whale-detail .amount{color:var(--gold);font-size:16px;font-weight:900;}
+.whale-alert .whale-detail .token{color:var(--accent);font-weight:800;}
+.whale-alert .whale-meta{display:flex;gap:12px;margin-top:4px;font-size:10px;color:var(--dim);}
+.whale-alert .whale-time{font-size:11px;color:var(--dim);font-weight:600;white-space:nowrap;}
+@keyframes slideInWhale{from{opacity:0;transform:translateX(-20px);}to{opacity:1;transform:translateX(0);}}
+
+/* LIVE FEED HERO ZONE */
+.live-hero{background:linear-gradient(135deg,rgba(0,255,136,0.05),rgba(153,69,255,0.05));
+  border:1px solid var(--border);border-radius:var(--radius2);padding:0;margin-bottom:20px;
+  position:relative;overflow:hidden;}
+.live-hero-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;
+  border-bottom:1px solid var(--border);background:rgba(0,0,0,0.2);}
+.live-hero-header .live-dot{width:10px;height:10px;border-radius:50%;background:var(--red);
+  animation:livePulse 1s infinite;box-shadow:0 0 12px var(--red);}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.6;transform:scale(1.3);}}
+.live-hero-header .live-label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:2px;
+  color:var(--red);display:flex;align-items:center;gap:8px;}
+.live-hero-header .live-count{font-size:10px;color:var(--dim);font-weight:600;}
+.live-hero-body{padding:20px;}
+.live-hero-event{animation:fadeIn .3s ease;}
+.live-hero-event .event-type{font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:900;
+  margin-bottom:8px;}
+.live-hero-event .event-type.alert{color:var(--red);}
+.live-hero-event .event-type.trade{color:var(--green);}
+.live-hero-event .event-type.scan{color:var(--blue);}
+.live-hero-event .event-type.whale{color:var(--gold);}
+.live-hero-event .event-main{font-size:24px;font-weight:900;line-height:1.3;margin-bottom:8px;}
+.live-hero-event .event-detail{font-size:12px;color:var(--text2);line-height:1.5;}
+.live-hero-event .event-detail b{color:var(--accent);}
+.live-hero-event .event-time{font-size:10px;color:var(--dim);margin-top:8px;}
 
 /* PARTICLE CANVAS */
 #particles{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.3;}
@@ -486,6 +527,22 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
 
   <!-- SWAP TAB -->
   <div class="tab-content active" id="tab-swap">
+    <!-- LIVE HERO ZONE - THE "OH SHIT" MOMENT -->
+    <div class="live-hero" id="liveHero">
+      <div class="live-hero-header">
+        <div class="live-label"><div class="live-dot"></div> LIVE NOW</div>
+        <div class="live-count" id="liveEventCount">0 events</div>
+      </div>
+      <div class="live-hero-body" id="liveHeroBody">
+        <div class="live-hero-event">
+          <div class="event-type scan">SCANNING MARKETS</div>
+          <div class="event-main">Watching <span style="color:var(--accent)">6,847</span> tokens across Solana</div>
+          <div class="event-detail">AI momentum scanner analyzing DexScreener data for optimal entry points. Next scan in <b id="nextScanTimer">12s</b></div>
+          <div class="event-time">just now</div>
+        </div>
+      </div>
+    </div>
+
     <div class="swap-container">
       <div class="swap-header">
         <h2>Swap</h2>
@@ -1989,26 +2046,88 @@ function tradeFromMarket(symbol){
 
 /* ===== WHALE ALERTS ===== */
 function generateWhaleAlerts(){
-  const whaleTokens=['SOL','JUP','BONK','WIF','RAY','JITO','PYTH','RENDER','POPCAT','ORCA'];
-  const actions=['bought','sold','transferred','staked','unstaked'];
-  const amounts=['$125K','$250K','$500K','$1.2M','$2.5M','$5M','$850K','$340K','$1.8M','$420K'];
+  const whales=[
+    {action:'bought',token:'SOL',amount:'$2.5M',size:'18,500 SOL',wallet:'7xKp...3mVq',mins:2,icon:'&#128640;'},
+    {action:'bought',token:'JUP',amount:'$1.8M',size:'1.6M JUP',wallet:'DRft...9kLp',mins:5,icon:'&#128165;'},
+    {action:'sold',token:'BONK',amount:'$850K',size:'29.8B BONK',wallet:'Fz4x...mN2w',mins:8,icon:'&#128308;'},
+    {action:'staked',token:'SOL',amount:'$5.2M',size:'38,500 SOL',wallet:'9Lpk...vX3j',mins:12,icon:'&#128274;'},
+    {action:'bought',token:'WIF',amount:'$420K',size:'171K WIF',wallet:'Hk9v...2nRt',mins:15,icon:'&#128640;'},
+    {action:'sold',token:'RENDER',amount:'$1.2M',size:'146K RENDER',wallet:'Bx7m...kQ4p',mins:18,icon:'&#128308;'},
+    {action:'transferred',token:'USDC',amount:'$8.5M',size:'8.5M USDC',wallet:'3pKf...nL8w',mins:22,icon:'&#128176;'},
+    {action:'bought',token:'PYTH',amount:'$340K',size:'809K PYTH',wallet:'Vn2x...jR5m',mins:25,icon:'&#128640;'},
+    {action:'bought',token:'POPCAT',amount:'$500K',size:'370K POPCAT',wallet:'Jk4w...mP9x',mins:28,icon:'&#128165;'},
+    {action:'staked',token:'JITO',amount:'$2.1M',size:'531K JTO',wallet:'Rm8v...kN3q',mins:35,icon:'&#128274;'},
+    {action:'sold',token:'RAY',amount:'$680K',size:'141K RAY',wallet:'Pz3x...vL7w',mins:40,icon:'&#128308;'},
+    {action:'bought',token:'ORCA',amount:'$1.5M',size:'361K ORCA',wallet:'Wx5n...jK2m',mins:45,icon:'&#128640;'},
+  ];
   const container=document.getElementById('whaleAlerts');
   container.innerHTML='';
-  for(let i=0;i<8;i++){
-    const token=whaleTokens[Math.floor(Math.random()*whaleTokens.length)];
-    const action=actions[Math.floor(Math.random()*actions.length)];
-    const amt=amounts[Math.floor(Math.random()*amounts.length)];
-    const mins=Math.floor(Math.random()*120)+1;
+  whales.forEach(w=>{
+    const cls=w.action==='bought'?'buy':w.action==='sold'?'sell':w.action==='staked'?'stake':'transfer';
     const d=document.createElement('div');
-    d.className='whale-alert';
+    d.className=`whale-alert ${cls}`;
     d.innerHTML=`
-      <span class="whale-icon">${action==='bought'?'&#128994;':action==='sold'?'&#128308;':'&#128051;'}</span>
-      <div class="whale-text">Whale ${action} <b>${amt}</b> worth of <b>${token}</b></div>
-      <div class="whale-time">${mins}m ago</div>
+      <span class="whale-icon">${w.icon}</span>
+      <div class="whale-body">
+        <div class="whale-action ${cls}">${w.action.toUpperCase()}</div>
+        <div class="whale-detail"><span class="amount">${w.amount}</span> of <span class="token">${w.token}</span></div>
+        <div class="whale-meta"><span>${w.size}</span><span>${w.wallet}</span></div>
+      </div>
+      <div class="whale-time">${w.mins}m ago</div>
     `;
     container.appendChild(d);
-  }
+  });
 }
+
+/* ===== LIVE EVENT ENGINE ===== */
+let liveEventCount=0;
+const liveEvents=[
+  {type:'whale',main:'Whale bought <span style="color:var(--gold)">$2.5M</span> of <span style="color:var(--accent)">SOL</span>',detail:'Wallet 7xKp...3mVq | 18,500 SOL accumulated in 3 transactions',icon:'&#128051;'},
+  {type:'alert',main:'<span style="color:var(--red)">MASSIVE SELL</span> detected on BONK',detail:'29.8B BONK ($850K) dumped by whale Fz4x...mN2w | Price impact: <b>-2.3%</b>',icon:'&#9888;'},
+  {type:'trade',main:'Bot entered <span style="color:var(--accent)">DIP BUY</span> position',detail:'Token trending +12% on 1h but pulling back -1.5% on 5m | Score: <b>72/100</b>',icon:'&#9889;'},
+  {type:'scan',main:'<span style="color:var(--blue)">847 tokens</span> scanned this cycle',detail:'3 passed filters | Best: POPCAT score 68 | Next scan: <b>12s</b>',icon:'&#128269;'},
+  {type:'whale',main:'<span style="color:var(--purple)">$5.2M SOL</span> just staked',detail:'Wallet 9Lpk...vX3j locked 38,500 SOL via Marinade Finance',icon:'&#128274;'},
+  {type:'alert',main:'Unusual volume spike on <span style="color:var(--accent)">JUP</span>',detail:'Volume up <b>340%</b> in last 5 minutes | 1,200 buys vs 180 sells',icon:'&#128200;'},
+  {type:'trade',main:'<span style="color:var(--green)">TAKE PROFIT</span> +3.1% on WIF',detail:'Held 24 seconds | Entry: 0.00456 SOL | Exit: 0.00470 SOL | Fee saved: <b>60%</b>',icon:'&#127881;'},
+  {type:'whale',main:'<span style="color:var(--gold)">$8.5M USDC</span> transferred',detail:'From Binance hot wallet to unknown | Possible OTC deal or market buy incoming',icon:'&#128176;'},
+  {type:'scan',main:'New trending token: <span style="color:var(--accent)">DRIFT</span>',detail:'5m: +4.2% | 1h: +18% | Liquidity: $2.1M | Buy/Sell ratio: <b>3.2x</b>',icon:'&#127775;'},
+  {type:'alert',main:'<span style="color:var(--orange)">RISK MODE</span> changed to DEFENSIVE',detail:'3 consecutive stop losses detected | Tightening entry criteria | Score threshold: <b>65</b>',icon:'&#128737;'},
+];
+let currentEventIdx=0;
+
+function pushLiveEvent(){
+  const ev=liveEvents[currentEventIdx%liveEvents.length];
+  currentEventIdx++;
+  liveEventCount++;
+  const body=document.getElementById('liveHeroBody');
+  if(!body) return;
+  const now=new Date();
+  const timeStr=now.toLocaleTimeString();
+  body.innerHTML=`
+    <div class="live-hero-event">
+      <div class="event-type ${ev.type}">${ev.icon} ${ev.type.toUpperCase()}</div>
+      <div class="event-main">${ev.main}</div>
+      <div class="event-detail">${ev.detail}</div>
+      <div class="event-time">${timeStr}</div>
+    </div>
+  `;
+  const counter=document.getElementById('liveEventCount');
+  if(counter) counter.textContent=liveEventCount+' events';
+}
+
+// Push a new live event every 8 seconds
+setInterval(pushLiveEvent,8000);
+// Start after 3 seconds
+setTimeout(pushLiveEvent,3000);
+
+// Countdown timer for next scan
+let scanCountdown=12;
+setInterval(()=>{
+  scanCountdown--;
+  if(scanCountdown<=0) scanCountdown=12;
+  const el=document.getElementById('nextScanTimer');
+  if(el) el.textContent=scanCountdown+'s';
+},1000);
 
 /* ===== PARTICLE BACKGROUND ===== */
 function initParticles(){
