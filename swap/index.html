@@ -328,7 +328,7 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
 /* LIVE TICKER BAR */
 .ticker-bar{position:fixed;top:var(--topbar-h);left:var(--sidebar-w);right:0;height:36px;
   background:linear-gradient(90deg,var(--bg2),#0d0d18,var(--bg2));border-bottom:1px solid var(--accent-dim);z-index:85;overflow:hidden;display:flex !important;align-items:center;}
-.ticker-track{display:flex;gap:28px;align-items:center;height:100%;animation:tickerScroll 90s linear infinite;white-space:nowrap;width:max-content;}
+.ticker-track{display:flex;gap:28px;align-items:center;height:100%;animation:tickerScroll 120s linear infinite;white-space:nowrap;width:max-content;}
 .ticker-track:hover{animation-play-state:paused;}
 @keyframes tickerScroll{0%{transform:translateX(0%)}100%{transform:translateX(-50%)}}
 .ticker-item{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;flex-shrink:0;}
@@ -1034,6 +1034,38 @@ function renderPopular(){
     d.onclick=()=>selectToken(t);
     g.appendChild(d);
   });
+  // Also show full Jupiter list below popular
+  renderJupiterList('');
+}
+
+function renderJupiterList(query){
+  let container=document.getElementById('jupiterFullList');
+  if(!container){
+    container=document.createElement('div');
+    container.id='jupiterFullList';
+    container.style.cssText='max-height:300px;overflow-y:auto;margin-top:8px;border-top:1px solid var(--border);padding-top:8px;';
+    document.getElementById('tokenResults').parentElement.appendChild(container);
+  }
+  if(jupiterTokenList.length===0){
+    container.innerHTML='<div style="text-align:center;padding:12px;color:var(--dim);font-size:11px;">Loading all tokens from Jupiter...</div>';
+    return;
+  }
+  const ql=query.toLowerCase();
+  let tokens=jupiterTokenList;
+  if(ql.length>=2){
+    tokens=tokens.filter(t=>t.symbol?.toLowerCase().includes(ql)||t.name?.toLowerCase().includes(ql));
+  }
+  const showing=tokens.slice(0,50);
+  const total=tokens.length;
+  container.innerHTML=`<div style="padding:4px 8px;font-size:10px;color:var(--dim);font-weight:700;">${total.toLocaleString()} TOKENS AVAILABLE ${ql?'(filtered)':''}</div>`;
+  showing.forEach(t=>{
+    const d=document.createElement('div');
+    d.className='token-result';
+    d.innerHTML=`<img src="${t.logoURI||'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2216%22 fill=%22%23333%22/%3E%3C/svg%3E'}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2216%22 fill=%22%23333%22/%3E%3C/svg%3E'"><div><div class="t-sym">${t.symbol||'???'}</div><div class="t-name">${t.name||'Unknown'}</div></div><div style="margin-left:auto;font-size:10px;color:var(--dim);">${t.address?.slice(0,6)}...</div>`;
+    d.onclick=()=>selectToken({symbol:t.symbol,name:t.name,mint:t.address,icon:t.logoURI||'',decimals:t.decimals||6});
+    container.appendChild(d);
+  });
+  if(total>50) container.innerHTML+=`<div style="text-align:center;padding:8px;font-size:11px;color:var(--accent);">Showing 50 of ${total.toLocaleString()} - type to filter</div>`;
 }
 
 function selectToken(t){
@@ -1054,7 +1086,8 @@ function selectToken(t){
 let searchTimeout;
 async function searchTokens(q){
   clearTimeout(searchTimeout);
-  if(!q||q.length<2){document.getElementById('tokenResults').innerHTML='';return;}
+  if(!q||q.length<2){document.getElementById('tokenResults').innerHTML='';renderJupiterList('');return;}
+  renderJupiterList(q);
   searchTimeout=setTimeout(async()=>{
     const res=document.getElementById('tokenResults');
     // Check if it's a mint address
@@ -1695,19 +1728,29 @@ let tickerData = [];
 async function loadTicker(){
   // Immediately show fallback ticker while API loads
   const fallbackData=[
+    // Top Crypto
     {symbol:'BTC',price:97850,change24h:2.4},{symbol:'ETH',price:3420,change24h:1.8},
     {symbol:'SOL',price:solPrice||135,change24h:3.2},{symbol:'BNB',price:612,change24h:0.9},
     {symbol:'XRP',price:2.35,change24h:1.5},{symbol:'ADA',price:0.98,change24h:2.1},
     {symbol:'DOGE',price:0.185,change24h:4.2},{symbol:'AVAX',price:38.50,change24h:2.7},
     {symbol:'DOT',price:7.82,change24h:1.3},{symbol:'LINK',price:18.40,change24h:3.5},
+    {symbol:'MATIC',price:0.72,change24h:1.9},{symbol:'UNI',price:12.50,change24h:2.3},
+    {symbol:'NEAR',price:6.80,change24h:3.1},{symbol:'SUI',price:1.85,change24h:5.6},
+    {symbol:'APT',price:9.40,change24h:2.8},{symbol:'ATOM',price:11.20,change24h:1.7},
+    // Solana Ecosystem
     {symbol:'JUP',price:1.12,change24h:5.1},{symbol:'BONK',price:0.0000285,change24h:8.3},
     {symbol:'WIF',price:2.45,change24h:6.2},{symbol:'RAY',price:4.80,change24h:3.8},
     {symbol:'JITO',price:3.95,change24h:2.9},{symbol:'RENDER',price:8.20,change24h:4.1},
+    {symbol:'PYTH',price:0.42,change24h:3.3},{symbol:'ORCA',price:4.15,change24h:2.5},
+    {symbol:'POPCAT',price:1.35,change24h:12.4},{symbol:'MEW',price:0.0089,change24h:7.8},
+    {symbol:'DRIFT',price:2.10,change24h:4.6},{symbol:'W',price:0.58,change24h:1.8},
+    // Stocks
     {symbol:'SPY',price:542.18,change24h:0.8},{symbol:'QQQ',price:478.65,change24h:1.2},
     {symbol:'NVDA',price:875.50,change24h:3.4},{symbol:'TSLA',price:248.30,change24h:2.1},
     {symbol:'AAPL',price:198.45,change24h:0.5},{symbol:'MSFT',price:425.20,change24h:0.3},
     {symbol:'AMZN',price:186.70,change24h:0.9},{symbol:'META',price:505.40,change24h:1.5},
     {symbol:'AMD',price:162.80,change24h:2.8},{symbol:'COIN',price:265.30,change24h:3.2},
+    {symbol:'GOOGL',price:175.30,change24h:0.6},{symbol:'MSTR',price:1685,change24h:4.5},
   ];
   renderTicker(fallbackData);
   // Then try to get live data
