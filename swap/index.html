@@ -328,9 +328,9 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
 /* LIVE TICKER BAR */
 .ticker-bar{position:fixed;top:var(--topbar-h);left:var(--sidebar-w);right:0;height:36px;
   background:linear-gradient(90deg,var(--bg2),#0d0d18,var(--bg2));border-bottom:1px solid var(--accent-dim);z-index:85;overflow:hidden;display:flex !important;align-items:center;}
-.ticker-track{display:flex;gap:32px;align-items:center;height:100%;animation:tickerScroll 60s linear infinite;white-space:nowrap;padding-left:100%;}
+.ticker-track{display:flex;gap:28px;align-items:center;height:100%;animation:tickerScroll 90s linear infinite;white-space:nowrap;width:max-content;}
 .ticker-track:hover{animation-play-state:paused;}
-@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes tickerScroll{0%{transform:translateX(0%)}100%{transform:translateX(-50%)}}
 .ticker-item{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;flex-shrink:0;}
 .ticker-item .t-sym{color:var(--accent);font-weight:800;font-size:12px;}
 .ticker-item .t-price{color:var(--text);font-weight:600;}
@@ -1729,9 +1729,10 @@ async function loadTicker(){
 
 function renderTicker(items){
   const track=document.getElementById('tickerTrack');
-  // Duplicate for seamless loop
-  const allItems=[...items,...items];
-  track.innerHTML=allItems.map(t=>{
+  // Deduplicate by symbol
+  const seen=new Set();
+  const unique=items.filter(t=>{if(seen.has(t.symbol))return false;seen.add(t.symbol);return true;});
+  const renderItem=t=>{
     const cls=t.change24h>=0?'up':'down';
     const sign=t.change24h>=0?'+':'';
     const priceStr=t.price>=1?'$'+t.price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'$'+t.price.toPrecision(4);
@@ -1741,7 +1742,10 @@ function renderTicker(items){
       <span class="t-change ${cls}">${sign}${t.change24h.toFixed(1)}%</span>
       <span class="t-dot"></span>
     </div>`;
-  }).join('');
+  };
+  // Render once, then clone for seamless loop
+  const html=unique.map(renderItem).join('');
+  track.innerHTML=html+html;
 }
 
 /* ===== MARKETS TAB ===== */
