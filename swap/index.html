@@ -805,18 +805,19 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
     </div>
 
     <div class="bot-strategy">
-      <h3>&#9889; 12% Profit Target Strategy</h3>
+      <h3>&#9889; Scalp Profit Strategy v3</h3>
       <div class="rule-list">
-        <div class="rule"><div class="num">1</div>TAKE PROFIT: Auto-sell at +12% gain (~8% net after fees)</div>
-        <div class="rule"><div class="num">2</div>TRAILING STOP: Dynamic trail — 3% at +6%, tightens to 1.5% at +10%</div>
-        <div class="rule"><div class="num">3</div>BREAKEVEN FLOOR: Once hit +5%, never let it drop below (covers fees)</div>
-        <div class="rule"><div class="num">4</div>STOP LOSS: Hard exit at -4% (max ~8% loss after fees)</div>
-        <div class="rule"><div class="num">5</div>DUMP DETECTED: 4 consecutive drops + in profit -> save what's left</div>
-        <div class="rule"><div class="num">6</div>BAD ENTRY: Down -3% in first 10 seconds -> cut immediately</div>
-        <div class="rule"><div class="num">7</div>FLAT EXIT: 90 seconds, peak under 2% -> no momentum, exit</div>
-        <div class="rule"><div class="num">8</div>SLOW BLEED: Down after 60s with no recovery -> cut losses</div>
-        <div class="rule"><div class="num">9</div>MAX TIME: 5 minute max hold, emergency dump at 6 min</div>
-        <div class="rule"><div class="num">10</div>ANTI-SCAM: Blocks fake tokens, pump.fun rugs, impersonators</div>
+        <div class="rule"><div class="num">1</div>TAKE PROFIT: Auto-sell at +7% gain (~4-5% net after fees)</div>
+        <div class="rule"><div class="num">2</div>TRAILING STOP: Ultra-tight — 1.5% at +4%, tightens to 0.8% at +6%</div>
+        <div class="rule"><div class="num">3</div>BREAKEVEN FLOOR: Once hit +3%, never drops below (covers all fees)</div>
+        <div class="rule"><div class="num">4</div>STOP LOSS: Hard exit at -2.5% (cut fast, don't bleed)</div>
+        <div class="rule"><div class="num">5</div>DUMP DETECTED: 3 consecutive drops while losing -> instant exit</div>
+        <div class="rule"><div class="num">6</div>BAD ENTRY: Down -2% in first 8 seconds -> wrong token, cut</div>
+        <div class="rule"><div class="num">7</div>FLAT EXIT: 60 seconds, peak under 1.5% -> dead token, exit</div>
+        <div class="rule"><div class="num">8</div>SLOW BLEED: Down after 30s with no recovery -> stop bleeding</div>
+        <div class="rule"><div class="num">9</div>MAX TIME: 3 min max hold, emergency dump at 4 min</div>
+        <div class="rule"><div class="num">10</div>REVERSAL: Was up 2%+ but now red -> momentum dead, exit</div>
+        <div class="rule"><div class="num">11</div>ANTI-SCAM: Blocks fake tokens, pump.fun rugs, impersonators</div>
       </div>
     </div>
 
@@ -2267,7 +2268,7 @@ setTimeout(()=>pushNewWhale(), 8000);
 /* ===== LIVE BADGE ROTATION ENGINE ===== */
 const liveBadgeQueue=[
   {type:'scan',text:'Scanning <b>6,847 tokens</b> across Solana'},
-  {type:'bot',text:'Bot strategy: <b>12% Profit Target v3</b> &mdash; 10 sell rules active, anti-scam filter ON'},
+  {type:'bot',text:'Bot strategy: <b>Scalp Profit v3</b> &mdash; 11 sell rules active, tight stops, anti-scam ON'},
   {type:'agent',text:'<b>3 AI agents</b> online &mdash; swap agent, scanner agent, risk agent'},
   {type:'arb',text:'Monitoring <b>12 DEX pairs</b> for arbitrage opportunities'},
   {type:'risk',text:'Risk mode: <b>NORMAL</b> &mdash; market volatility within bounds'},
