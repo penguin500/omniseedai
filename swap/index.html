@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@solana/web3.js@1.95.8/lib/index.iife.min.js"></script>
+<script src="https://unpkg.com/bs58@5.0.0/dist/index.umd.js"></script>
 <style>
 :root{
   --bg:#05050a;--bg2:#0a0a12;--card:#0e0e18;--card2:#13131f;--card3:#181825;
@@ -290,6 +291,42 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
 .wallet-option .w-tag{font-size:11px;color:var(--dim);}
 .wallet-option .w-detected{margin-left:auto;font-size:10px;color:var(--accent);font-weight:700;}
 
+/* OMNIWALLET MODAL */
+.omni-wallet-modal{max-width:460px;}
+.omni-wallet-modal .ow-tabs{display:flex;gap:4px;margin-bottom:16px;}
+.omni-wallet-modal .ow-tab{flex:1;padding:12px;border-radius:var(--radius);font-weight:700;font-size:13px;
+  background:var(--card2);border:1px solid var(--border);text-align:center;transition:all .2s;cursor:pointer;}
+.omni-wallet-modal .ow-tab.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+.omni-wallet-modal .ow-tab:hover{border-color:var(--accent);}
+.ow-section{display:none;}
+.ow-section.active{display:block;}
+.ow-input{width:100%;padding:12px 16px;border-radius:var(--radius);background:var(--card2);border:1px solid var(--border);
+  color:var(--text);font-size:14px;margin-bottom:12px;font-family:inherit;}
+.ow-input:focus{border-color:var(--accent);outline:none;}
+.ow-input.mono{font-family:'Courier New',monospace;font-size:12px;}
+.ow-btn{width:100%;padding:14px;border-radius:var(--radius);font-weight:800;font-size:14px;
+  background:linear-gradient(135deg,var(--accent),#00cc66);color:#000;border:none;cursor:pointer;transition:all .2s;margin-bottom:8px;}
+.ow-btn:hover{box-shadow:0 4px 20px var(--accent-dim);transform:translateY(-1px);}
+.ow-btn.secondary{background:var(--card2);color:var(--text);border:1px solid var(--border);}
+.ow-btn.secondary:hover{border-color:var(--accent);color:var(--accent);}
+.ow-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.ow-warning{padding:12px;border-radius:var(--radius);background:rgba(255,153,51,0.1);border:1px solid rgba(255,153,51,0.3);
+  color:var(--orange);font-size:12px;margin-bottom:12px;line-height:1.5;}
+.ow-seed-box{padding:14px;border-radius:var(--radius);background:var(--card3);border:1px solid var(--border);
+  font-family:'Courier New',monospace;font-size:12px;color:var(--text);margin-bottom:12px;word-break:break-all;
+  line-height:1.6;user-select:all;cursor:pointer;position:relative;}
+.ow-seed-box::after{content:'Click to copy';position:absolute;top:4px;right:8px;font-size:9px;color:var(--dim);font-family:inherit;}
+.ow-info{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.ow-info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--card2);border-radius:var(--radius);font-size:13px;}
+.ow-info-row .label{color:var(--dim);}
+.ow-info-row .value{font-weight:700;font-family:'Courier New',monospace;font-size:12px;}
+.ow-info-row .value.accent{color:var(--accent);}
+.ow-divider{height:1px;background:var(--border);margin:16px 0;}
+.ow-wallet-section{text-align:center;padding:8px 0;}
+.ow-wallet-section .ow-addr{font-family:'Courier New',monospace;font-size:11px;color:var(--dim);cursor:pointer;padding:6px;border-radius:6px;background:var(--card2);display:inline-block;margin-bottom:8px;}
+.ow-wallet-section .ow-addr:hover{color:var(--accent);}
+.ow-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+
 /* TOAST */
 .toast-container{position:fixed;top:calc(var(--topbar-h) + 12px);right:12px;z-index:300;display:flex;flex-direction:column;gap:8px;}
 .toast{padding:14px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;
@@ -560,6 +597,61 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
   <div class="modal">
     <h3>Connect Wallet <span class="close" onclick="closeModal('walletModal')">&times;</span></h3>
     <div id="walletOptions"></div>
+  </div>
+</div>
+
+<!-- OMNIWALLET MODAL -->
+<div class="modal-overlay" id="omniWalletModal">
+  <div class="modal omni-wallet-modal">
+    <h3>OmniWallet <span class="close" onclick="closeModal('omniWalletModal')">&times;</span></h3>
+    <!-- Setup view (no wallet yet) -->
+    <div id="owSetup">
+      <div class="ow-tabs">
+        <div class="ow-tab active" onclick="owSwitchTab('create',this)">Create New</div>
+        <div class="ow-tab" onclick="owSwitchTab('import',this)">Import Key</div>
+      </div>
+      <!-- Create section -->
+      <div class="ow-section active" id="owCreate">
+        <p style="color:var(--text2);font-size:13px;margin-bottom:12px;">Generate a new Solana keypair stored locally in your browser.</p>
+        <input class="ow-input" type="password" id="owCreatePwd" placeholder="Set encryption password (min 8 chars)">
+        <input class="ow-input" type="password" id="owCreatePwd2" placeholder="Confirm password">
+        <button class="ow-btn" onclick="owCreateWallet()">Generate Wallet</button>
+      </div>
+      <!-- Import section -->
+      <div class="ow-section" id="owImport">
+        <p style="color:var(--text2);font-size:13px;margin-bottom:12px;">Paste your base58-encoded private key (64-byte or 32-byte secret key).</p>
+        <textarea class="ow-input mono" id="owImportKey" rows="3" placeholder="Paste private key here..."></textarea>
+        <input class="ow-input" type="password" id="owImportPwd" placeholder="Set encryption password (min 8 chars)">
+        <button class="ow-btn" onclick="owImportWallet()">Import Wallet</button>
+      </div>
+    </div>
+    <!-- Seed phrase confirmation (shown after create) -->
+    <div id="owSeedConfirm" style="display:none;">
+      <div class="ow-warning">IMPORTANT: Save this private key now. It will NOT be shown again. Anyone with this key can access your funds. Store it securely offline.</div>
+      <div class="ow-seed-box" id="owSeedDisplay" onclick="owCopySeed()"></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);margin-bottom:12px;cursor:pointer;">
+        <input type="checkbox" id="owSeedCheck"> I have saved my private key securely
+      </label>
+      <button class="ow-btn" id="owConfirmBtn" disabled onclick="owFinishSetup()">Continue</button>
+    </div>
+    <!-- Connected view -->
+    <div id="owConnected" style="display:none;">
+      <div class="ow-wallet-section">
+        <div style="font-size:32px;margin-bottom:8px;">&#128737;</div>
+        <div class="ow-addr" id="owAddrDisplay" onclick="owCopyAddr()" title="Click to copy"></div>
+      </div>
+      <div class="ow-info">
+        <div class="ow-info-row"><span class="label">SOL Balance</span><span class="value accent" id="owSolBal">Loading...</span></div>
+        <div class="ow-info-row"><span class="label">Network</span><span class="value">Solana Mainnet</span></div>
+      </div>
+      <button class="ow-btn" onclick="owConnectToSwap()">Use This Wallet for Swaps</button>
+      <div class="ow-actions">
+        <button class="ow-btn secondary" onclick="owExportKey()">Export Key</button>
+        <button class="ow-btn secondary" onclick="owRefreshBalance()">Refresh Balance</button>
+      </div>
+      <div class="ow-divider"></div>
+      <button class="ow-btn secondary" style="color:var(--red);border-color:rgba(255,68,102,0.3);" onclick="owDeleteWallet()">Delete Wallet</button>
+    </div>
   </div>
 </div>
 
@@ -1047,18 +1139,32 @@ function getConn() { return new solanaWeb3.Connection(RPC, 'confirmed'); }
 
 /* ===== WALLET ===== */
 const WALLETS = [
-  {name:"Phantom",id:"phantom",check:()=>window.phantom?.solana?.isPhantom,get:()=>window.phantom?.solana,icon:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='8' fill='%23ab9ff2'/%3E%3Cpath d='M10 23c0-7.2 5.8-13 13-13h3c1.1 0 2 .9 2 2v8c0 7.2-5.8 13-13 13h-3c-1.1 0-2-.9-2-2v-8z' fill='white'/%3E%3Ccircle cx='17' cy='19' r='2' fill='%23ab9ff2'/%3E%3Ccircle cx='23' cy='19' r='2' fill='%23ab9ff2'/%3E%3C/svg%3E"},
-  {name:"Solflare",id:"solflare",check:()=>window.solflare?.isSolflare,get:()=>window.solflare,icon:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='8' fill='%23fc8c17'/%3E%3Ccircle cx='18' cy='18' r='8' fill='white'/%3E%3C/svg%3E"},
-  {name:"Backpack",id:"backpack",check:()=>window.backpack,get:()=>window.backpack,icon:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='8' fill='%23e33e3f'/%3E%3Crect x='10' y='8' width='16' height='20' rx='4' fill='white'/%3E%3C/svg%3E"},
-  {name:"Coinbase Wallet",id:"coinbase",check:()=>window.coinbaseSolana,get:()=>window.coinbaseSolana,icon:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='8' fill='%230052ff'/%3E%3Ccircle cx='18' cy='18' r='10' fill='white'/%3E%3Crect x='14' y='14' width='8' height='8' rx='1' fill='%230052ff'/%3E%3C/svg%3E"}
+  {name:"Phantom",id:"phantom",
+    check:()=>{try{return !!(window.phantom?.solana?.isPhantom || window.solana?.isPhantom)}catch(e){return false}},
+    get:()=>window.phantom?.solana || window.solana,
+    icon:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='8' fill='%23ab9ff2'/%3E%3Cpath d='M10 23c0-7.2 5.8-13 13-13h3c1.1 0 2 .9 2 2v8c0 7.2-5.8 13-13 13h-3c-1.1 0-2-.9-2-2v-8z' fill='white'/%3E%3Ccircle cx='17' cy='19' r='2' fill='%23ab9ff2'/%3E%3Ccircle cx='23' cy='19' r='2' fill='%23ab9ff2'/%3E%3C/svg%3E"},
+  {name:"Solflare",id:"solflare",
+    check:()=>{try{return !!(window.solflare?.isSolflare)}catch(e){return false}},
+    get:()=>window.solflare,
+    icon:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='8' fill='%23fc8c17'/%3E%3Ccircle cx='18' cy='18' r='8' fill='white'/%3E%3C/svg%3E"},
+  {name:"Backpack",id:"backpack",
+    check:()=>{try{return !!(window.backpack?.isBackpack || window.xnft?.solana)}catch(e){return false}},
+    get:()=>window.backpack || window.xnft?.solana,
+    icon:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='8' fill='%23e33e3f'/%3E%3Crect x='10' y='8' width='16' height='20' rx='4' fill='white'/%3E%3C/svg%3E"},
+  {name:"Coinbase Wallet",id:"coinbase",
+    check:()=>{try{return !!(window.coinbaseSolana || (window.ethereum?.isCoinbaseWallet && window.coinbaseSolana))}catch(e){return false}},
+    get:()=>window.coinbaseSolana,
+    icon:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='8' fill='%230052ff'/%3E%3Ccircle cx='18' cy='18' r='10' fill='white'/%3E%3Crect x='14' y='14' width='8' height='8' rx='1' fill='%230052ff'/%3E%3C/svg%3E"}
 ];
 
 function openWalletModal(){
   if(wallet){disconnectWallet();return;}
   const c=document.getElementById('walletOptions');
   c.innerHTML='';
+  let anyDetected=false;
   WALLETS.forEach(w=>{
     const detected=w.check();
+    if(detected) anyDetected=true;
     const d=document.createElement('div');
     d.className='wallet-option';
     d.innerHTML=`<img src="${w.icon}" class="w-icon"><div><div class="w-name">${w.name}</div><div class="w-tag">${detected?'Detected':'Not installed'}</div></div>${detected?'<div class="w-detected">&#10003;</div>':''}`;
@@ -1066,23 +1172,62 @@ function openWalletModal(){
     else d.onclick=()=>toast(`Install ${w.name} to continue`,'info');
     c.appendChild(d);
   });
+  // OmniWallet fallback - always show but highlighted when no extensions detected
+  const owDiv=document.createElement('div');
+  owDiv.className='wallet-option';
+  const hasOW=localStorage.getItem('omni_wallet_enc');
+  const owLabel=hasOW?'Stored locally':'Built-in browser wallet';
+  const owHighlight=!anyDetected?' style="border-color:var(--accent);box-shadow:0 0 15px var(--accent-dim);"':'';
+  owDiv.innerHTML=`<div class="w-icon" style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#000;flex-shrink:0;">OW</div><div><div class="w-name">OmniWallet</div><div class="w-tag">${owLabel}</div></div>${hasOW?'<div class="w-detected">&#10003;</div>':''}`;
+  if(owHighlight) owDiv.setAttribute('style',owHighlight.replace(' style="','').replace('"',''));
+  owDiv.onclick=()=>{closeModal('walletModal');owOpenModal();};
+  c.appendChild(owDiv);
+  if(!anyDetected){
+    const hint=document.createElement('div');
+    hint.style.cssText='text-align:center;padding:8px;font-size:11px;color:var(--dim);margin-top:4px;';
+    hint.textContent='No wallet extensions detected. Try OmniWallet below!';
+    c.insertBefore(hint,c.firstChild);
+  }
   openModal('walletModal');
 }
 
 async function connectWallet(w){
   try{
     const provider=w.get();
-    if(!provider) throw new Error('Not found');
-    const resp=await provider.connect();
-    wallet=resp.publicKey.toBase58();
+    if(!provider) throw new Error(w.name+' provider not found. Make sure the extension is installed and enabled.');
+    // Some wallets need explicit connection, handle both patterns
+    let pubKey;
+    if(provider.publicKey && provider.isConnected){
+      pubKey=provider.publicKey;
+    } else {
+      const resp=await provider.connect();
+      pubKey=resp?.publicKey || provider.publicKey;
+    }
+    if(!pubKey) throw new Error('Could not get public key from '+w.name+'. Try refreshing the page.');
+    wallet=typeof pubKey.toBase58==='function'?pubKey.toBase58():pubKey.toString();
     walletProvider=provider;
     closeModal('walletModal');
     updateWalletUI();
     loadBalances();
-    toast('Wallet connected!','success');
+    toast(w.name+' connected!','success');
     localStorage.setItem('omni_wallet',w.id);
+    // Listen for disconnect events
+    if(provider.on){
+      provider.on('disconnect',()=>{
+        if(wallet){disconnectWallet();toast(w.name+' disconnected','info');}
+      });
+      provider.on('accountChanged',(newPk)=>{
+        if(newPk){wallet=newPk.toBase58();updateWalletUI();loadBalances();toast('Account changed','info');}
+        else disconnectWallet();
+      });
+    }
   }catch(e){
-    toast('Connection failed: '+e.message,'error');
+    const msg=e.message||String(e);
+    if(msg.includes('User rejected')||msg.includes('user rejected')){
+      toast('Connection cancelled by user','info');
+    } else {
+      toast('Connection failed: '+msg,'error');
+    }
   }
 }
 
@@ -1107,9 +1252,187 @@ function updateWalletUI(){
   document.getElementById('swapBtn').textContent='Swap';
 }
 
+/* ===== OMNIWALLET - BUILT-IN BROWSER WALLET ===== */
+function owSwitchTab(tab,el){
+  document.querySelectorAll('.ow-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('owCreate').style.display=tab==='create'?'block':'none';
+  document.getElementById('owImport').style.display=tab==='import'?'block':'none';
+}
+function owCopySeed(){
+  const seedEl=document.getElementById('owSeedDisplay');
+  if(seedEl?.textContent){navigator.clipboard?.writeText(seedEl.textContent);toast('Private key copied!','success');}
+}
+function owConfirmSeed(){
+  if(!document.getElementById('owSeedCheck')?.checked){toast('Confirm you saved the key','error');return;}
+  closeModal('omniWalletModal');
+}
+let _owKeypair=null;
+
+function owOpenModal(){
+  const hasExisting=localStorage.getItem('omni_wallet_enc');
+  if(hasExisting){
+    // Show unlock screen
+    const m=document.getElementById('omniWalletModal');
+    m.querySelector('.ow-tabs')?.remove();
+    const unlockDiv=document.getElementById('owCreate');
+    const importDiv=document.getElementById('owImport');
+    if(unlockDiv) unlockDiv.style.display='none';
+    if(importDiv) importDiv.style.display='none';
+    // Add unlock UI if not already there
+    let unlockEl=document.getElementById('owUnlock');
+    if(!unlockEl){
+      unlockEl=document.createElement('div');
+      unlockEl.id='owUnlock';
+      unlockEl.className='ow-section active';
+      unlockEl.innerHTML=`<p style="color:var(--dim);font-size:12px;">Stored OmniWallet found. Enter password to unlock.</p>
+        <input class="ow-input" type="password" id="owUnlockPwd" placeholder="Enter password">
+        <button class="ow-btn" onclick="owUnlockWallet()">Unlock & Connect</button>
+        <button class="ow-btn" style="background:var(--danger);margin-top:6px;" onclick="if(confirm('Delete stored wallet? This cannot be undone!')){localStorage.removeItem('omni_wallet_enc');localStorage.removeItem('omni_wallet_addr');toast('Wallet deleted','info');closeModal('omniWalletModal');}">Delete Wallet</button>`;
+      m.querySelector('.modal-box').appendChild(unlockEl);
+    } else { unlockEl.style.display='block'; }
+  } else {
+    // Show create/import tabs
+    const unlockEl=document.getElementById('owUnlock');
+    if(unlockEl) unlockEl.style.display='none';
+    const createEl=document.getElementById('owCreate');
+    const importEl=document.getElementById('owImport');
+    if(createEl) createEl.style.display='block';
+    if(importEl) importEl.style.display='none';
+  }
+  openModal('omniWalletModal');
+}
+
+async function _owEncrypt(data, password){
+  const enc=new TextEncoder();
+  const keyMaterial=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:100000,hash:'SHA-256'},keyMaterial,{name:'AES-GCM',length:256},false,['encrypt']);
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const encrypted=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(data));
+  return JSON.stringify({s:Array.from(salt),i:Array.from(iv),d:Array.from(new Uint8Array(encrypted))});
+}
+
+async function _owDecrypt(stored, password){
+  const {s,i,d}=JSON.parse(stored);
+  const enc=new TextEncoder();
+  const keyMaterial=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:new Uint8Array(s),iterations:100000,hash:'SHA-256'},keyMaterial,{name:'AES-GCM',length:256},false,['decrypt']);
+  const decrypted=await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(i)},key,new Uint8Array(d));
+  return new TextDecoder().decode(decrypted);
+}
+
+async function owCreateWallet(){
+  const pwd=document.getElementById('owCreatePwd').value;
+  const pwd2=document.getElementById('owCreatePwd2').value;
+  if(pwd.length<8){toast('Password must be at least 8 characters','error');return;}
+  if(pwd!==pwd2){toast('Passwords do not match','error');return;}
+  try{
+    const kp=solanaWeb3.Keypair.generate();
+    const secretStr=JSON.stringify(Array.from(kp.secretKey));
+    const encrypted=await _owEncrypt(secretStr,pwd);
+    localStorage.setItem('omni_wallet_enc',encrypted);
+    localStorage.setItem('omni_wallet_addr',kp.publicKey.toBase58());
+    _owKeypair=kp;
+    wallet=kp.publicKey.toBase58();
+    walletProvider={publicKey:kp.publicKey,isOmniWallet:true,
+      signTransaction:async(tx)=>{tx.sign(kp);return tx;},
+      signAllTransactions:async(txs)=>{txs.forEach(tx=>tx.sign(kp));return txs;},
+      signAndSendTransaction:async(tx)=>{
+        const conn=getConn();tx.sign(kp);
+        const sig=await conn.sendRawTransaction(tx.serialize());
+        return{signature:sig};
+      }};
+    closeModal('omniWalletModal');
+    updateWalletUI();loadBalances();
+    localStorage.setItem('omni_wallet','omniwallet');
+    toast('OmniWallet created! Address: '+wallet.slice(0,8)+'...','success');
+  }catch(e){toast('Failed to create wallet: '+e.message,'error');}
+}
+
+async function owImportWallet(){
+  const keyStr=document.getElementById('owImportKey').value.trim();
+  const pwd=document.getElementById('owImportPwd').value;
+  if(pwd.length<8){toast('Password must be at least 8 characters','error');return;}
+  if(!keyStr){toast('Paste your private key','error');return;}
+  try{
+    let secretKey;
+    // Try base58 decode first, then JSON array
+    try{
+      const decoded=bs58?.decode?bs58.decode(keyStr):null;
+      if(decoded&&decoded.length===64) secretKey=decoded;
+    }catch(e){}
+    if(!secretKey){
+      try{const arr=JSON.parse(keyStr);secretKey=new Uint8Array(arr);}catch(e){}
+    }
+    if(!secretKey||secretKey.length!==64) throw new Error('Invalid private key. Must be base58 or JSON array of 64 bytes.');
+    const kp=solanaWeb3.Keypair.fromSecretKey(secretKey);
+    const encrypted=await _owEncrypt(JSON.stringify(Array.from(kp.secretKey)),pwd);
+    localStorage.setItem('omni_wallet_enc',encrypted);
+    localStorage.setItem('omni_wallet_addr',kp.publicKey.toBase58());
+    _owKeypair=kp;
+    wallet=kp.publicKey.toBase58();
+    walletProvider={publicKey:kp.publicKey,isOmniWallet:true,
+      signTransaction:async(tx)=>{tx.sign(kp);return tx;},
+      signAllTransactions:async(txs)=>{txs.forEach(tx=>tx.sign(kp));return txs;},
+      signAndSendTransaction:async(tx)=>{
+        const conn=getConn();tx.sign(kp);
+        const sig=await conn.sendRawTransaction(tx.serialize());
+        return{signature:sig};
+      }};
+    closeModal('omniWalletModal');
+    updateWalletUI();loadBalances();
+    localStorage.setItem('omni_wallet','omniwallet');
+    toast('Wallet imported! Address: '+wallet.slice(0,8)+'...','success');
+  }catch(e){toast('Import failed: '+e.message,'error');}
+}
+
+async function owUnlockWallet(){
+  const pwd=document.getElementById('owUnlockPwd').value;
+  if(!pwd){toast('Enter your password','error');return;}
+  try{
+    const encrypted=localStorage.getItem('omni_wallet_enc');
+    const secretStr=await _owDecrypt(encrypted,pwd);
+    const secretKey=new Uint8Array(JSON.parse(secretStr));
+    const kp=solanaWeb3.Keypair.fromSecretKey(secretKey);
+    _owKeypair=kp;
+    wallet=kp.publicKey.toBase58();
+    walletProvider={publicKey:kp.publicKey,isOmniWallet:true,
+      signTransaction:async(tx)=>{tx.sign(kp);return tx;},
+      signAllTransactions:async(txs)=>{txs.forEach(tx=>tx.sign(kp));return txs;},
+      signAndSendTransaction:async(tx)=>{
+        const conn=getConn();tx.sign(kp);
+        const sig=await conn.sendRawTransaction(tx.serialize());
+        return{signature:sig};
+      }};
+    closeModal('omniWalletModal');
+    updateWalletUI();loadBalances();
+    localStorage.setItem('omni_wallet','omniwallet');
+    toast('OmniWallet unlocked!','success');
+  }catch(e){
+    if(e.message?.includes('decrypt')||e.name==='OperationError') toast('Wrong password','error');
+    else toast('Unlock failed: '+e.message,'error');
+  }
+}
+
 async function eagerConnect(){
   const saved=localStorage.getItem('omni_wallet');
   if(!saved) return;
+  // Handle OmniWallet auto-reconnect (needs password, just show address)
+  if(saved==='omniwallet'){
+    const addr=localStorage.getItem('omni_wallet_addr');
+    if(addr){
+      wallet=addr;
+      walletProvider={publicKey:{toBase58:()=>addr},isOmniWallet:true,needsUnlock:true,
+        signTransaction:async()=>{toast('Unlock OmniWallet first (click wallet button)','error');throw new Error('locked');},
+        signAndSendTransaction:async()=>{toast('Unlock OmniWallet first','error');throw new Error('locked');}};
+      updateWalletUI();
+      // Show balance even when locked (read-only)
+      try{const conn=getConn();const bal=await conn.getBalance(new solanaWeb3.PublicKey(addr));
+        document.getElementById('walletSolBal').textContent=(bal/1e9).toFixed(4)+' SOL';}catch(e){}
+    }
+    return;
+  }
   const w=WALLETS.find(x=>x.id===saved);
   if(!w||!w.check()) return;
   try{
@@ -1380,13 +1703,24 @@ async function executeSwap(){
     const txBuf=Uint8Array.from(atob(data.swapTransaction),c=>c.charCodeAt(0));
     const tx=solanaWeb3.VersionedTransaction.deserialize(txBuf);
     let sig;
-    if(walletProvider.signAndSendTransaction){
-      const result=await walletProvider.signAndSendTransaction(tx);
+    if(walletProvider._isOmniWallet){
+      // OmniWallet: sign locally with stored keypair
+      const kp=await owGetKeypair();
+      if(!kp) throw new Error('OmniWallet locked. Please unlock first.');
+      tx.sign([kp]);
+      const conn=getConn();
+      sig=await conn.sendRawTransaction(tx.serialize(),{skipPreflight:false,preflightCommitment:'confirmed'});
+      await conn.confirmTransaction(sig,'confirmed');
+    } else if(walletProvider.signAndSendTransaction){
+      const result=await walletProvider.signAndSendTransaction(tx,{skipPreflight:false,preflightCommitment:'confirmed'});
       sig=result.signature||result;
-    }else{
+      if(sig instanceof Uint8Array) sig=btoa(String.fromCharCode(...sig));
+    }else if(walletProvider.signTransaction){
       const signed=await walletProvider.signTransaction(tx);
       const conn=getConn();
-      sig=await conn.sendRawTransaction(signed.serialize());
+      sig=await conn.sendRawTransaction(signed.serialize(),{skipPreflight:false,preflightCommitment:'confirmed'});
+    }else{
+      throw new Error('Wallet does not support transaction signing');
     }
     toast(`Swap successful! <a href="https://solscan.io/tx/${sig}" target="_blank" style="color:inherit;text-decoration:underline;">View on Solscan</a>`,'success');
     // Count swap for free tier enforcement
